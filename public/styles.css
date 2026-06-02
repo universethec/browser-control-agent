@@ -1,0 +1,566 @@
+/* ============================================================
+   Browser Control Agent — styles.css
+   Implements 04-UI-SPEC.md verbatim (warm-editorial-minimal).
+   Single fixed light theme. No animations. No dark-mode queries.
+   ============================================================ */
+
+/* ----- CSS Reset ------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ----- @font-face ------------------------------------------ */
+@font-face {
+  font-family: "Bureau Serif";
+  src: url("./fonts/STKBureauSerif-ExtraLight-Trial.otf") format("opentype");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("./fonts/Inter-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("./fonts/Inter-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("./fonts/Inter-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ----- Design tokens (UI-SPEC Color section — exact values) --- */
+:root {
+  --color-bg:              #ffffff;
+  --color-surface:         #f2f1ed;
+  --color-surface-hover:   #f7f6f5;
+  --color-surface-active:  #dbd7cd;
+  --color-ink:             #000000;
+  --color-ink-secondary:   rgba(0,0,0,0.55);
+  --color-ink-tertiary:    rgba(0,0,0,0.40);
+  --color-ink-contrast:    #ffffff;
+  --color-accent:          #e27457;
+  --color-warning:         #e0922e; /* amber-orange — distinct from the terracotta accent (reads red) */
+  --color-warning-bg:      rgba(224, 146, 46, 0.12);
+  --color-warning-text:    #8a5a1a;
+  --color-border:          #f2f1ed;
+  --color-border-strong:   #dbd7cd;
+  --color-border-focus:    #000000;
+  --color-btn-primary:     #000000;
+  --color-btn-primary-hover: #2a2420;
+
+  /* Spacing scale (8-point base) */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  32px;
+  --space-2xl: 48px;
+}
+
+/* ----- Base -------------------------------------------------- */
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-ink);
+  background: var(--color-surface); /* canvas behind the panel before the first frame */
+}
+
+/* ----- Typography roles -------------------------------------- */
+/* Display: Bureau Serif 28px / 200 / lh 1.15 / ls -0.84px */
+.display {
+  font-family: "Bureau Serif", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  font-size: 28px;
+  font-weight: 200;
+  line-height: 1.15;
+  letter-spacing: -0.84px;
+}
+
+/* Heading: Bureau Serif 20px / 200 / lh 1.2 / ls -0.5px */
+.heading {
+  font-family: "Bureau Serif", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  font-size: 20px;
+  font-weight: 200;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+/* Label: Inter 13px / 500 / lh 1.4 */
+.label {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+/* Body: Inter 15px / 400 / lh 1.5 */
+.body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+/* ----- Floating control panel ------------------------------- */
+/* Centered command modal on load → docks bottom-left (compact, not full height,
+   on top of the full-screen browser) after the first command. The two states swap
+   via a brief opacity fade in app.js (avoids a jumpy center→corner reflow). */
+#panel {
+  position: fixed;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  transition: opacity 0.2s ease;
+}
+
+/* Initial: centered modal */
+#panel.panel--center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(540px, 92vw);
+  max-height: 86vh;
+}
+
+/* After first command: compact, bottom-left, NOT full height */
+#panel.panel--docked {
+  left: var(--space-lg);
+  bottom: var(--space-lg);
+  width: min(380px, 92vw);
+  max-height: 62vh;
+}
+
+#panel-header {
+  padding: var(--space-lg) var(--space-lg) var(--space-sm);
+  flex-shrink: 0;
+}
+
+#panel-header h1 {
+  color: var(--color-ink);
+}
+
+/* Docked: shrink the title, hide the idle hint to keep the panel compact */
+#panel.panel--docked #panel-header {
+  padding: var(--space-md) var(--space-md) var(--space-xs);
+}
+
+#panel.panel--docked #panel-header h1 {
+  font-size: 16px;
+  letter-spacing: -0.3px;
+}
+
+#panel.panel--docked #idle-state {
+  display: none;
+}
+
+/* Thread — content-height in the centered modal; grows + scrolls once docked. */
+#thread {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* Empty thread takes no space (clean centered modal before any messages) */
+#thread:empty {
+  display: none;
+}
+
+/* Docked: thread fills the panel and scrolls */
+#panel.panel--docked #thread {
+  flex: 1 1 auto;
+}
+
+/* ----- Message bubbles -------------------------------------- */
+.bubble {
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 4px;
+  word-break: break-word;
+}
+
+/* Agent status bubble */
+.status-bubble {
+  background: var(--color-surface);
+  color: var(--color-ink-secondary);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 4px;
+  word-break: break-word;
+}
+
+.status-bubble .step-counter {
+  color: var(--color-ink-tertiary);
+  font-size: 13px;
+  font-weight: 500;
+  margin-right: var(--space-xs);
+}
+
+/* User bubble — visually distinct from agent bubbles */
+.user-bubble {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 4px;
+  border-left: 3px solid var(--color-ink);
+  word-break: break-word;
+  align-self: flex-end;
+  max-width: 90%;
+}
+
+/* Result bubble */
+.result-bubble {
+  background: var(--color-surface);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.result-bubble.ok-true {
+  color: var(--color-ink);
+}
+
+.result-bubble.ok-false {
+  color: var(--color-ink-secondary);
+}
+
+/* Error bubble — terracotta treatment (only context for accent as bg/text)
+   G4 gap closure: vertical padding reduced (xs=4px) for a shorter footprint;
+   locked identity preserved: rgba(226,116,87,0.08) bg, 3px accent border, accent text. */
+.error-bubble {
+  background: rgba(226, 116, 87, 0.08);
+  border-left: 3px solid var(--color-accent);
+  color: var(--color-accent);
+  padding: var(--space-xs) var(--space-lg);
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.error-bubble .error-heading {
+  font-weight: 500;
+  margin-bottom: var(--space-xs);
+}
+
+.error-bubble .error-retry {
+  margin-top: var(--space-xs);
+  color: var(--color-accent);
+  font-size: 13px;
+}
+
+/* Clarify bubble */
+.clarify-bubble {
+  background: var(--color-surface);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.clarify-bubble .clarify-question {
+  color: var(--color-ink);
+  margin-bottom: var(--space-sm);
+}
+
+/* Clarify chips */
+.clarify-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.clarify-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 9999px;
+  background: var(--color-surface-active);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-ink);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
+  min-height: 36px;
+}
+
+.clarify-chip:hover {
+  background: var(--color-surface-hover);
+}
+
+.clarify-chip:disabled,
+.clarify-chip.clicked {
+  color: var(--color-ink-tertiary);
+  pointer-events: none;
+  cursor: default;
+}
+
+/* ----- Composer row (pinned bottom) -------------------------- */
+#composer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+#composer-input {
+  flex: 1;
+  height: 44px;
+  padding: 0 var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 4px;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-ink);
+  outline: none;
+}
+
+#composer-input::placeholder {
+  color: var(--color-ink-secondary);
+}
+
+#composer-input:focus {
+  border-color: var(--color-border-focus);
+}
+
+#composer-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Run button */
+#run-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-md);
+  height: 44px;
+  border-radius: 9999px;
+  background: var(--color-btn-primary);
+  color: var(--color-ink-contrast);
+  border: none;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
+  min-height: 36px;
+  white-space: nowrap;
+}
+
+#run-btn:hover {
+  background: var(--color-btn-primary-hover);
+}
+
+#run-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Stop button — accent/terracotta (only allowed context) */
+#stop-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-md);
+  height: 44px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  color: var(--color-ink-contrast);
+  border: none;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
+  min-height: 36px;
+  white-space: nowrap;
+}
+
+#stop-btn:hover {
+  background: #c8633e;
+}
+
+/* ----- Controlled browser — full-screen background ---------- */
+/* Fills the whole viewport behind the floating panel. cover (per design choice): the
+   1288x711 frame is ~16:9, so on a normal screen the crop is minimal — the old hard
+   crop was an artifact of the narrow 30% side-pane, not of cover itself. Hidden until
+   the first frame; app.js sets src + unhides. The injected highlight box (baked into
+   the frame server-side) marks the action on this full-screen canvas. */
+#screenshot {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  /* Anchor the top: cover crops only the bottom, so the page header/search bar at
+     the top is never cut off "under" the edge (default center would crop top+bottom). */
+  object-position: top center;
+  display: none;
+  z-index: 0;
+  background: var(--color-surface);
+}
+
+/* ----- Loading state (browser starting, before the first frame) ----- */
+/* Sits above the (empty) screenshot, below the panel. app.js toggles display. */
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: none; /* app.js sets flex while waiting for the first frame */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  background: var(--color-surface);
+}
+
+.loader-spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid var(--color-surface-active);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: loader-spin 0.8s linear infinite;
+}
+
+#loader p {
+  color: var(--color-ink-secondary);
+}
+
+@keyframes loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ----- Idle state (hint + suggestions, centered-modal only) - */
+#idle-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0 var(--space-lg) var(--space-md);
+}
+
+#idle-state h2 {
+  color: var(--color-ink);
+  margin-bottom: var(--space-md);
+}
+
+#idle-state .body {
+  color: var(--color-ink-secondary);
+  margin-bottom: var(--space-md);
+}
+
+/* Demo commands list */
+.demo-commands {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.demo-commands li {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-ink);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+}
+
+.demo-commands .arrow {
+  color: var(--color-ink-tertiary);
+  flex-shrink: 0;
+}
+
+/* SF-area testing disclaimer — its own amber/orange warning box (not red) */
+.idle-note {
+  margin-top: var(--space-md);
+  background: var(--color-warning-bg);
+  border-left: 3px solid var(--color-warning);
+  border-radius: 4px;
+  padding: var(--space-sm) var(--space-md);
+  color: var(--color-warning-text);
+  font-size: 13px;
+}
+
+/* ----- Disconnect notice (replaces composer on WS close) ---- */
+#disconnect-notice {
+  padding: var(--space-md);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-ink-secondary);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* ----- Responsive: panel spans the width on small screens --- */
+@media (max-width: 720px) {
+  #panel.panel--center {
+    width: 92vw;
+  }
+
+  #panel.panel--docked {
+    left: var(--space-sm);
+    right: var(--space-sm);
+    bottom: var(--space-sm);
+    width: auto;
+    max-height: 55vh;
+  }
+}

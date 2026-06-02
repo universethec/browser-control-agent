@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browser Control Agent</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <!-- Controlled browser — full-screen background canvas -->
+  <img id="screenshot" src="" alt="Browser screenshot" />
+
+  <!-- Loading animation — shown while the browser starts, until the first frame -->
+  <div id="loader" aria-hidden="true">
+    <div class="loader-spinner"></div>
+    <p class="body">Starting browser…</p>
+  </div>
+
+  <!-- Floating control panel: centered command modal on load,
+       docks bottom-left (compact, not full height) after the first command. -->
+  <section id="panel" class="panel--center">
+    <header id="panel-header">
+      <h1 class="display">Browser Control Agent</h1>
+    </header>
+
+    <div id="idle-state">
+      <p class="body">What should I do? A few things to try:</p>
+      <ul class="demo-commands">
+        <li><span class="arrow">→</span> weekend weather forecast for SF</li>
+        <li><span class="arrow">→</span> book a table for 2 at 7pm at Rich Table in SF</li>
+        <li><span class="arrow">→</span> add a 12oz bag of coffee to cart on Amazon</li>
+      </ul>
+      <p class="idle-note">For testing, this currently works in the San Francisco area only.</p>
+    </div>
+
+    <div id="thread" role="log" aria-live="polite" aria-label="Chat thread"></div>
+
+    <div id="composer">
+      <input
+        id="composer-input"
+        type="text"
+        placeholder="Type a command…"
+        autocomplete="off"
+        aria-label="Command input"
+      />
+      <button id="run-btn" type="button">Run</button>
+      <button id="stop-btn" type="button" style="display:none;">Stop</button>
+    </div>
+  </section>
+
+  <script src="/app.js"></script>
+</body>
+</html>
